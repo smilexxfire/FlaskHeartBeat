@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Heartbeat Monitor</title>
+    <style>
+        .recent { color: green; }
+        .stale { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Heartbeat Monitor</h1>
+    <ul id="heartbeat-list"></ul>
+
+    <script>
+        // 格式化时间函数
+        function formatDateTime(dateTime) {
+            const date = new Date(dateTime);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        function getColor(lastHeartbeatTime) {
+            const now = new Date();
+            const lastTime = new Date(lastHeartbeatTime);
+            const oneMinute = 60 * 1000; // 1 minute in milliseconds
+
+            return (now - lastTime) <= oneMinute ? 'recent' : 'stale';
+        }
+
+        function updateHeartbeatList(data) {
+            const list = document.getElementById('heartbeat-list');
+            list.innerHTML = '';
+
+            Object.entries(data).forEach(([ip, info]) => {
+                const li = document.createElement('li');
+                li.className = getColor(info.latest_time);
+                li.textContent = `IP: ${ip}, (Received at ${formatDateTime(info.latest_time)}) | Running Time: ${info.duration}`;
+                list.appendChild(li);
+            });
+        }
+
+        // 每5秒钟更新一次心跳信息
+        setInterval(function() {
+            fetch('/api/heartbeat')
+                .then(response => response.json())
+                .then(data => updateHeartbeatList(data))
+                .catch(error => console.error('Error fetching data:', error));
+        }, 2000);
+    </script>
+</body>
+</html>
