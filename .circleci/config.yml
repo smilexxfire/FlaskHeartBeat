@@ -31,10 +31,14 @@ jobs:
       - setup_remote_docker
 
       - run:
-          name: Tag and Push Docker image to latest
-          command: |
+          name: Tag
+          command:
             docker tag `cat version.txt` `"$(awk -F: '{print $1 ":latest"}' version.txt)"`
-            docker push "$DOCKER_IMAGE:latest"
+
+      - run:
+          name: Push Docker image to latest
+          command: |
+            docker push `"$(awk -F: '{print $1 ":latest"}' version.txt)"`      
 
 workflows:
   build-and-test:
