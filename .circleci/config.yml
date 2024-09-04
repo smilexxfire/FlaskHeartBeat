@@ -21,15 +21,6 @@ jobs:
       - run:
           name: Push Docker image
           command: docker push `cat version.txt`
-
-  deploy-latest:
-    # 部署latest分支镜像
-    docker:
-      - image: cimg/base:stable
-
-    steps:
-      - setup_remote_docker
-
       - run:
           name: Tag
           command: docker tag `cat version.txt` `$(awk -F":" '{print $1 ":latest"}' version.txt)`
@@ -42,6 +33,3 @@ workflows:
   build-and-test:
     jobs:
       - deploy
-      - deploy-latest:
-          requires:
-            - deploy
