@@ -11,9 +11,6 @@ jobs:
       - setup_remote_docker
 
       - run:
-          name: test
-          command: echo `cat version.txt`
-      - run:
           name: Log in to Docker Hub
           command: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
@@ -25,10 +22,19 @@ jobs:
           name: Push Docker image
           command: docker push `cat version.txt`
 
+  deploy-latest:
+    # 部署latest分支镜像
+    steps:
+      - run:
+          name: Tag and Push Docker image to latest
+          command: |
+            docker tag `cat version.txt` `"$(awk -F: '{print $1 ":latest"}' version.txt)"`
+            docker push "$DOCKER_IMAGE:latest"
+
 workflows:
   build-and-test:
     jobs:
       - deploy
-    # - deploy:
-    #     requires:
-    #       - test-python
+      - deploy-latest:
+          requires:
+            - deploy
