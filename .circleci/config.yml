@@ -23,11 +23,11 @@ jobs:
           command: docker push `cat version.txt`
       - run:
           name: Tag
-          command: docker tag `cat version.txt` `$(awk -F":" '{print $1 ":latest"}' version.txt)`
+          command: docker tag `cat version.txt` `awk -F":" '{print $1 ":latest"}' version.txt`
 
       - run:
           name: Push Docker image to latest
-          command: docker push `$(awk -F":" '{print $1 ":latest"}' version.txt)`
+          command: docker push `awk -F":" '{print $1 ":latest"}' version.txt`
 
 workflows:
   build-and-test:
