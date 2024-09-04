@@ -1,25 +1,12 @@
 # This config was automatically generated from your source code
 # Stacks detected: deps:python:.
 version: 2.1
-# 定义参数
-parameters:
-  docker_image:
-    type: string
-    default: "smilexxfire/flask-heart-beat"
-  docker_tag:
-    type: string
-    default: "2.3"
-  docker_tag_latest:
-    type: string
-    default: "latest"
 
 jobs:
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
       - image: cimg/base:stable
-    environment:
-      IMAGETAG: << pipeline.parameters.docker_image >>":"<< pipeline.parameters.docker_image >>
     steps:
       - checkout
       - setup_remote_docker
@@ -30,11 +17,11 @@ jobs:
 
       - run:
           name: Build Docker image
-          command: docker build -t ${IMAGETAG} .
+          command: docker build -t `cat version.txt` .
 
       - run:
           name: Push Docker image
-          command: docker push << pa>>
+          command: docker push `cat version.txt`
       - run:
           name: Tag
           command: docker tag `cat version.txt` `awk -F":" '{print $1 ":latest"}' version.txt`
