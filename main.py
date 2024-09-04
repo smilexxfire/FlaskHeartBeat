@@ -39,7 +39,10 @@ def udp_listener():
         except:
             pass
 
-
+# 后台启动UDP监听线程
+listener_thread = threading.Thread(target=udp_listener)
+listener_thread.daemon = True
+listener_thread.start()
 # Flask路由，用于展示心跳信息
 @app.route('/')
 def index():
@@ -67,9 +70,5 @@ def api_heartbeat():
 
 
 if __name__ == '__main__':
-    # 后台启动UDP监听线程
-    listener_thread = threading.Thread(target=udp_listener)
-    listener_thread.daemon = True
-    listener_thread.start()
     # 启动web应用
     app.run(host='0.0.0.0', port=HTTP_PORT)
