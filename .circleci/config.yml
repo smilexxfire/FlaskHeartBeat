@@ -24,7 +24,12 @@ jobs:
 
   deploy-latest:
     # 部署latest分支镜像
+    docker:
+      - image: cimg/base:stable
+
     steps:
+      - setup_remote_docker
+
       - run:
           name: Tag and Push Docker image to latest
           command: |
