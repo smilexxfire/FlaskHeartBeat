@@ -32,6 +32,11 @@
             color: #007BFF;
         }
 
+        h2 {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
         .heartbeat-info {
             display: flex;
             flex-direction: column;
@@ -46,6 +51,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .heartbeat-item.inactive {
+            border-left: 5px solid red;
         }
 
         .heartbeat-item div {
@@ -82,13 +91,30 @@
                 .then(data => {
                     heartbeatInfoDiv.innerHTML = '';
 
-                    // 将数据按latest_time排序，最早的在前
-                    const sortedData = Object.entries(data).sort(([, a], [, b]) => {
-                        return new Date(a.latest_time) - new Date(b.latest_time);
+                    const activeIPs = [];
+                    const inactiveIPs = [];
+                    const now = new Date();
+
+                    // 遍历数据并分类
+                    Object.entries(data).forEach(([ip, info]) => {
+                        const latestTime = new Date(info.latest_time);
+                        const diffInSeconds = (now - latestTime) / 1000;
+
+                        if (diffInSeconds <= 60) {
+                            activeIPs.push([ip, info]);
+                        } else {
+                            inactiveIPs.push([ip, info]);
+                        }
                     });
 
-                    // 遍历排序后的数据，更新页面
-                    for (const [ip, info] of Object.entries(data)) {
+                    // 按时间排序
+                    activeIPs.sort(([, a], [, b]) => new Date(a.latest_time) - new Date(b.latest_time));
+                    inactiveIPs.sort(([, a], [, b]) => new Date(a.latest_time) - new Date(b.latest_time));
+
+                    // 渲染 "有心跳" 的 IP 分组
+                    const activeCount = activeIPs.length;
+                    heartbeatInfoDiv.innerHTML += `<h2>Active IPs (${activeCount})</h2>`;
+                    activeIPs.forEach(([ip, info]) => {
                         const itemDiv = document.createElement("div");
                         itemDiv.classList.add("heartbeat-item");
                         itemDiv.innerHTML = `
@@ -102,7 +128,26 @@
                             </div>
                         `;
                         heartbeatInfoDiv.appendChild(itemDiv);
-                    }
+                    });
+
+                    // 渲染 "暂时没有心跳" 的 IP 分组
+                    const inactiveCount = inactiveIPs.length;
+                    heartbeatInfoDiv.innerHTML += `<h2 style="color:red;">Inactive IPs (${inactiveCount})</h2>`;
+                    inactiveIPs.forEach(([ip, info]) => {
+                        const itemDiv = document.createElement("div");
+                        itemDiv.classList.add("heartbeat-item", "inactive");
+                        itemDiv.innerHTML = `
+                            <div>
+                                <div class="ip-address">${ip}</div>
+                                <div class="hostname">${info.hostname}</div>
+                            </div>
+                            <div>
+                                <div class="duration">Duration: ${info.duration}</div>
+                                <div class="latest-time">Last seen: ${info.latest_time}</div>
+                            </div>
+                        `;
+                        heartbeatInfoDiv.appendChild(itemDiv);
+                    });
                 })
                 .catch(error => console.error('Error fetching heartbeat:', error));
         }
@@ -112,7 +157,7 @@
 
         // Fetch every 2 seconds
         setInterval(fetchHeartbeat, 2000);
-        });
+    });
     </script>
 </body>
 </html>
