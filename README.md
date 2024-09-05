@@ -13,4 +13,4 @@ docker run -d -p 8081:8081 -p 5006:5006/udp smilexxfire/flask-heart-beat
 2. 必须为json格式消息 
 2. 消息中必须包含`hostname`,`duration`字段
 ## 截图
-![](https://qiniu.xxf.world/pic/2024/09/04/56a3c252-1323-49a0-b216-947f949339ab.png)
+![](https://qiniu.xxf.world/pic/2024/09/05/f2dbbb81-aaa3-41e7-a989-9c3044edaa89.png)
